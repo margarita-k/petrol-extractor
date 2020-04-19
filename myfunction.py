@@ -7,7 +7,6 @@ import pandas as pd
 ############################################
 #          Class MyDoc
 ############################################
-
 class MyDoc:
 	def __init__(self):
 		self.id = -1
@@ -22,21 +21,19 @@ class MyDoc:
 ############################################
 #          GET FORMAT
 ############################################
-
-
 def get_format(doc):
 	mydoc = MyDoc()
 	mydoc.doc = doc
 
 	paragraphs = enumerate(doc.paragraphs)
 	for i, paragraph in paragraphs:
-		if (re.search("ПРОТОКОЛ", paragraph.text, re.IGNORECASE)):
+		if (re.search("ПРОТОКОЛ", paragraph.text, re.IGNORECASE) and mydoc.type == "UNKNOWN"):
 			index = paragraph.text.find("№")
 			if (index != -1):
 				mydoc.id = paragraph.text[index+1 : -2].strip()
 			mydoc.type = "ПРОТОКОЛ"
 
-		elif (re.search("ПАСПОРТ", paragraph.text, re.IGNORECASE)):
+		elif (re.search("ПАСПОРТ", paragraph.text, re.IGNORECASE) and mydoc.type == "UNKNOWN"):
 			index = paragraph.text.find("№")
 			if (index != -1):
 				mydoc.id = paragraph.text[index+1 : -2].strip()		
@@ -45,26 +42,25 @@ def get_format(doc):
 		
 
 		# Get sample, client and producer info
-		if (re.search("найменування", paragraph.text, re.IGNORECASE)):
+		if (re.search("найменування", paragraph.text, re.IGNORECASE) and mydoc.sample == -1):
 			index = paragraph.text.find(":")
 			if (index != -1):
 				mydoc.sample = paragraph.text[index+1 : -1]
 				mydoc.sample = clear(mydoc.sample)
 				
-		if (re.search("Виробник", paragraph.text, re.IGNORECASE)):
+		if (re.search("Виробник", paragraph.text, re.IGNORECASE) and mydoc.producer == -1):
 			index = paragraph.text.find(":")
 			if (index != -1):
 				mydoc.producer = paragraph.text[index+1 : -1]
 				mydoc.producer = clear(mydoc.producer)
 				
-		if (re.search("Замовник", paragraph.text, re.IGNORECASE)):
+		if (re.search("Замовник", paragraph.text, re.IGNORECASE) and mydoc.client == -1):
 			index = paragraph.text.find(":")
 			if (index != -1):
 				mydoc.client = paragraph.text[index+1 : -1]
 				mydoc.client = clear(mydoc.client)
 
 		# Get results table for "ПРОТОКОЛ"
-
 		if(re.search("Результати випроб", paragraph.text, re.IGNORECASE)):
 			if(re.search("таблиц", paragraph.text, re.IGNORECASE)):
 				mydoc.table_num = int(paragraph.text[-2])
@@ -92,9 +88,6 @@ def get_format(doc):
 	
 	return (mydoc)
 
-
-
-
 ############################################
 #   Remove new line at the end of string
 ############################################
@@ -105,36 +98,9 @@ def clear(string):
 	string = string.replace('\n','')
 	return(string)
 				
-				
-
-
-############################################
-#          GET RESULTS TABLE NUM
-############################################
-
-""" def get_result_tab(doc, mydoc):
-	paragraphs = enumerate(doc.paragraphs)
-	for i, par in paragraphs:
-		if(re.search("Результати випроб", par.text, re.IGNORECASE)):
-			if(re.search("таблиц", par.text, re.IGNORECASE)):
-				n = par.text[-2]
-				mydoc.table_num = int(n)
-				tab_titles = doc.tables[mydoc.table_num].rows[0].cells
-				break
-				
-			else:
-				for k in range(0,5):
-					new_par = doc.paragraphs[i+k]
-					if(re.search("таблиц", new_par.text, re.IGNORECASE)):
-						mydoc.table_num = int(new_par.text[-1])
-						tab_titles = doc.tables[mydoc.table_num].rows[0].cells
-						break
-				break """
-
 ############################################
 #       GET NAMES OF FILES IN DIRECTORY
 ############################################
-
 def get_names(path):
 
 	files_list = []
@@ -150,7 +116,6 @@ def get_names(path):
 ############################################
 #       FIND PROPERTY IN PROTOCOL
 ############################################
-
 def find_property(substr, mydoc):
 	table = mydoc.doc.tables[mydoc.table_num]
 
@@ -168,7 +133,6 @@ def find_property(substr, mydoc):
 ############################################
 #          Clean chrom data
 ############################################
-
 def clean_chrom_data(df):
 	condition1 = df.ID.str.contains("\d{4}", regex = True, na = False)
 	condition2 = df.ID.str.contains("\\\\\d{3}", regex = True, na = False)
