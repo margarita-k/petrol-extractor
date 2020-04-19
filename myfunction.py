@@ -116,6 +116,7 @@ def get_names(path):
 ############################################
 #       FIND PROPERTY IN PROTOCOL
 ############################################
+'''
 def find_property(substr, mydoc):
 	table = mydoc.doc.tables[mydoc.table_num]
 
@@ -129,7 +130,22 @@ def find_property(substr, mydoc):
 			return(result)
 	
 	return("na")
-						
+'''
+def find_properties(df,prop_dict,mydoc,i):
+	table = mydoc.doc.tables[mydoc.table_num]
+	
+	for row in table.rows:
+		prop_name = row.cells[1].text
+		for key, prop in prop_dict.items():
+			if (re.search(prop, prop_name, re.IGNORECASE)):
+				result = row.cells[mydoc.results_col].text
+				result = result.strip()
+				result = result.replace('\n', '')
+				result = result.replace('\t', '')
+				result = result.replace('\r', '')
+				df.at[i,key] = result
+				break
+	return(df)
 ############################################
 #          Clean chrom data
 ############################################
