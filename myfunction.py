@@ -2,7 +2,7 @@ import re
 import docx
 import os
 import pandas as pd
-
+import math
 
 ############################################
 #          Class MyDoc
@@ -43,22 +43,20 @@ def get_format(doc):
 
 		# Get sample, client and producer info
 		if (re.search("найменування", paragraph.text, re.IGNORECASE) and mydoc.sample == -1):
-			index = paragraph.text.find(":")
-			if (index != -1):
-				mydoc.sample = paragraph.text[index+1 : -1]
-				mydoc.sample = clear(mydoc.sample)
-				
+				index = paragraph.text.find(":")
+				if (index != -1):
+					mydoc.sample = clear(paragraph.text[index+1 : -1])
+				else:
+					mydoc.sample = clear(doc.paragraphs[i-1].text)
 		if (re.search("Виробник", paragraph.text, re.IGNORECASE) and mydoc.producer == -1):
 			index = paragraph.text.find(":")
 			if (index != -1):
-				mydoc.producer = paragraph.text[index+1 : -1]
-				mydoc.producer = clear(mydoc.producer)
-				
+				mydoc.producer = clear(paragraph.text[index+1 : -1])
+
 		if (re.search("Замовник", paragraph.text, re.IGNORECASE) and mydoc.client == -1):
 			index = paragraph.text.find(":")
 			if (index != -1):
-				mydoc.client = paragraph.text[index+1 : -1]
-				mydoc.client = clear(mydoc.client)
+				mydoc.client = clear(paragraph.text[index+1 : -1])
 
 		# Get results table for "ПРОТОКОЛ"
 		if(re.search("Результати випроб", paragraph.text, re.IGNORECASE)):
@@ -116,28 +114,14 @@ def get_names(path):
 ############################################
 #       FIND PROPERTY IN PROTOCOL
 ############################################
-'''
-def find_property(substr, mydoc):
-	table = mydoc.doc.tables[mydoc.table_num]
 
-	for row in table.rows:
-		prop_name = row.cells[1].text
-		if (re.search(substr, prop_name, re.IGNORECASE)):
-			result = row.cells[mydoc.results_col].text
-			result = result.strip()
-			result = result.replace('\n', '')
-			result = result.replace('\t', '')
-			return(result)
-	
-	return("na")
-'''
 def find_properties(df,prop_dict,mydoc,i):
 	table = mydoc.doc.tables[mydoc.table_num]
 	
 	for row in table.rows:
 		prop_name = row.cells[1].text
 		for key, prop in prop_dict.items():
-			if (re.search(prop, prop_name, re.IGNORECASE)):
+			if (re.search(prop, prop_name, re.IGNORECASE) and pd.isnull(df.at[i,key])):
 				result = row.cells[mydoc.results_col].text
 				result = result.strip()
 				result = result.replace('\n', '')
@@ -145,6 +129,7 @@ def find_properties(df,prop_dict,mydoc,i):
 				result = result.replace('\r', '')
 				df.at[i,key] = result
 				break
+		
 	return(df)
 ############################################
 #          Clean chrom data

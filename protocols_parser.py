@@ -24,7 +24,7 @@ prop_dict = {
 	"Кінець кипіння":"кіне?ц",
 	"Залишок після випаровування":"залиш",
 	"ДНП":"насиченої",
-	"Індукційний період":"ст(абільн|ійк)",
+	"Індукційний період":"ст(абільн|ійкість до)",
 	"Фактичні смоли":"смол",
 	"Сірка":"сірки",
 	"Олефінові вуглеводні":"олефін",
@@ -39,7 +39,6 @@ prop_dict = {
 }
 
 i = 0
-#k = 0
 
 for item in files_list:	
 	try:
@@ -64,12 +63,8 @@ for item in files_list:
 	df.at[i,"Замовник"] = mydoc.client
 
 	df = myfunction.find_properties(df,prop_dict,mydoc,i)                                                                    
-	'''for column in df.columns[6:]:
-		df.at[i,column] = myfunction.find_property(mylist[k], mydoc)
-		k = k + 1
-	'''
+
 	i = i + 1
-	# k = 0
 	print(item, " COMPLETED")	
 p.disable()
 p_stats = pstats.Stats(p)
